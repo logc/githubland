@@ -1,208 +1,186 @@
 import json
 
 import responses
-from nose.tools import assert_equals, with_setup
+from nose.tools import assert_equals
 
 import main
 
-USER_LOGIN = "mojombo"
-ANOTHER_USER_LOGIN = "logc"
-COUNTRY = "Spain"
 
-
-def setup():
-    cc = COUNTRY
+class TestLanguageByCountryCounts(object):
+    user, password = 'fake', 'fake'
+    instance = main.LanguageByCountryCounts(user, password)
+    cc = "Spain"
+    fst_user_login = "mojombo"
+    snd_user_login = "logc"
     base = 'https://api.github.com/search/users'
-    user_query = '{0}?q=location:{1}'.format(base, cc)
-    users_response = {
+    fst_user_query = '{0}?q=location:{1}'.format(base, cc)
+    snd_user_query = '{0}?q=location%3A{1}&page=2'.format(base, cc)
+    fst_user_response = {
         "total_count": 2,
         "incomplete_results": False,
         "items": [{
-            "login": USER_LOGIN,
+            "login": fst_user_login,
             "id": 1,
-            "avatar_url": "whatever",
-            "gravatar_id": "25c7c18223fb42a4c6ae1c8db6f50f9b",
-            "url": "https://api.github.com/users/mojombo",
-            "html_url": "https://github.com/mojombo",
-            "followers_url": "whatever",
-            "subscriptions_url": "whatever",
-            "organizations_url": "https://api.github.com/users/mojombo/orgs",
-            "repos_url": "https://api.github.com/users/mojombo/repos",
-            "received_events_url": "whatever",
-            "type": "User",
+            # ... other infos skipped ...
             "score": 105.47857}]}
-    user_links = {
+    snd_user_response = {
+        "total_count": 2,
+        "incomplete_results": False,
+        "items": [{
+            "login": snd_user_login,
+            "id": 2,
+            # ... other infos skipped ...
+            "score": 10.357}]}
+    fst_user_links = {
         'Link': '<{0}?q=location%3A{1}&page=2>; rel="next",'.format(base, cc) +
                 '<{0}?q=location%3A{1}&page=2>; rel="last"'.format(base, cc)}
-    user_last_query = '{0}?q=location%3A{1}&page=2'.format(base, cc)
-    user_last_response = {
-        "total_count": 2,
-        "incomplete_results": False,
-        "items": [{
-            "login": ANOTHER_USER_LOGIN,
-            "id": 2,
-            "avatar_url": "whatever",
-            "gravatar_id": "25c7c18223fb42a4c6ae1c8db6f50f9b",
-            "url": "https://api.github.com/users/logc",
-            "html_url": "https://github.com/logc",
-            "followers_url": "whatever",
-            "subscriptions_url": "whatever",
-            "organizations_url": "https://api.github.com/users/logc/orgs",
-            "repos_url": "https://api.github.com/users/logc/repos",
-            "received_events_url": "whatever",
-            "type": "User",
-            "score": 10.357}]}
-    user_last_links = {
+    snd_user_links = {
         'Link':
             '<{0}?q=location%3A{1}&page=2>; rel="last",'.format(base, cc) +
             '<{0}?q=location%3A{1}&page=1>; rel="first",'.format(base, cc) +
             '<{0}?q=location%3A{1}&page=1>; rel="prev"'.format(base, cc)}
-    repos_query = 'https://api.github.com/users/{}/repos'.format(USER_LOGIN)
-    repos_response = [{
-        "id": 1296269,
+    fst_repos_query = 'https://api.github.com/users/{}/repos'.format(
+        fst_user_login)
+    snd_repos_query = 'https://api.github.com/users/{}/repos'.format(
+        snd_user_login)
+    fst_repos_response = [{
+        "id": 1296268,
         "owner": {
-            "login": USER_LOGIN,
+            "login": fst_user_login,
             "id": 1,
-            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
-            "gravatar_id": "somehexcode",
-            "url": "https://api.github.com/users/octocat",
-            "html_url": "https://github.com/octocat",
-            "followers_url": "https://api.github.com/users/octocat/followers",
-            "following_url": "whatever",
-            "gists_url": "whatever",
-            "starred_url": "whatever",
-            "subscriptions_url": "whatever",
-            "organizations_url": "https://api.github.com/users/octocat/orgs",
-            "repos_url": "https://api.github.com/users/octocat/repos",
-            "events_url": "whatever",
-            "received_events_url": "whatever",
-            "type": "User",
-            "site_admin": False
+            # ... other infos skipped ...
             },
         "name": "Hello-World",
-        "full_name": "octocat/Hello-World",
-        "description": "This your first repo!",
-        "private": False,
-        "fork": False,
-        "url": "https://api.github.com/repos/octocat/Hello-World",
-        "html_url": "https://github.com/octocat/Hello-World",
-        "clone_url": "https://github.com/octocat/Hello-World.git",
-        "git_url": "git://github.com/octocat/Hello-World.git",
-        "ssh_url": "git@github.com:octocat/Hello-World.git",
-        "svn_url": "https://svn.github.com/octocat/Hello-World",
-        "mirror_url": "git://git.example.com/octocat/Hello-World",
-        "homepage": "https://github.com",
+        "full_name": "{}/Hello-World".format(fst_user_login),
+        # ... other infos skipped ...
         "language": "Java",
         "forks_count": 9,
         "stargazers_count": 80,
         "watchers_count": 80,
-        "size": 108,
-        "default_branch": "master",
-        "open_issues_count": 0,
-        "has_issues": True,
-        "has_wiki": True,
-        "has_downloads": True,
-        "pushed_at": "2011-01-26T19:06:43Z",
-        "created_at": "2011-01-26T19:01:12Z",
-        "updated_at": "2011-01-26T19:14:43Z",
-        "permissions": {
-            "admin": False,
-            "push": False,
-            "pull": True}}]
-    repos_last_query = 'https://api.github.com/users/{}/repos'.format(
-        ANOTHER_USER_LOGIN)
-    repos_last_response = [{
+        # ... other infos skipped ...
+        },
+        {
+        "id": 1296269,
+        "owner": {
+            "login": fst_user_login,
+            "id": 1,
+            # ... other infos skipped ...
+            },
+        "name": "Hello-Man",
+        "full_name": "{}/Hello-Man".format(fst_user_login),
+        # ... other infos skipped ...
+        "language": "Java",
+        "forks_count": 9,
+        "stargazers_count": 80,
+        "watchers_count": 80,
+        # ... other infos skipped ...
+        }
+        ]
+    snd_repos_response = [{
         "id": 1296270,
         "owner": {
-            "login": ANOTHER_USER_LOGIN,
+            "login": snd_user_login,
             "id": 2,
-            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
-            "gravatar_id": "somehexcode",
-            "url": "https://api.github.com/users/octocat",
-            "html_url": "https://github.com/octocat",
-            "followers_url": "https://api.github.com/users/octocat/followers",
-            "following_url": "whatever",
-            "gists_url": "whatever",
-            "starred_url": "whatever",
-            "subscriptions_url": "whatever",
-            "organizations_url": "https://api.github.com/users/octocat/orgs",
-            "repos_url": "https://api.github.com/users/octocat/repos",
-            "events_url": "whatever",
-            "received_events_url": "whatever",
-            "type": "User",
-            "site_admin": False
+            # ... other infos skipped ...
             },
         "name": "Hello-World",
-        "full_name": "octocat/Hello-World",
-        "description": "This your first repo!",
-        "private": False,
-        "fork": False,
-        "url": "https://api.github.com/repos/octocat/Hello-World",
-        "html_url": "https://github.com/octocat/Hello-World",
-        "clone_url": "https://github.com/octocat/Hello-World.git",
-        "git_url": "git://github.com/octocat/Hello-World.git",
-        "ssh_url": "git@github.com:octocat/Hello-World.git",
-        "svn_url": "https://svn.github.com/octocat/Hello-World",
-        "mirror_url": "git://git.example.com/octocat/Hello-World",
-        "homepage": "https://github.com",
+        "full_name": "{}/Hello-World".format(snd_user_login),
+        # ... other infos skipped ...
         "language": "Python",
         "forks_count": 9,
         "stargazers_count": 80,
         "watchers_count": 80,
-        "size": 108,
-        "default_branch": "master",
-        "open_issues_count": 0,
-        "has_issues": True,
-        "has_wiki": True,
-        "has_downloads": True,
-        "pushed_at": "2011-01-26T19:06:43Z",
-        "created_at": "2011-01-26T19:01:12Z",
-        "updated_at": "2011-01-26T19:14:43Z",
-        "permissions": {
-            "admin": False,
-            "push": False,
-            "pull": True}}]
-    responses.add(
-        responses.GET, user_query, match_querystring=True,
-        body=json.dumps(users_response),
-        adding_headers=user_links,
-        status=200, content_type='application/json')
-    responses.add(
-        responses.GET, user_last_query, match_querystring=True,
-        body=json.dumps(user_last_response),
-        adding_headers=user_last_links,
-        status=200, content_type='application/json')
-    responses.add(
-        responses.GET, repos_query, match_querystring=True,
-        body=json.dumps(repos_response),
-        status=200, content_type='application/json')
-    responses.add(
-        responses.GET, repos_last_query, match_querystring=True,
-        body=json.dumps(repos_last_response),
-        status=200, content_type='application/json')
+        # ... other infos skipped ...
+        },
+        {
+        "id": 1296271,
+        "owner": {
+            "login": snd_user_login,
+            "id": 2,
+            # ... other infos skipped ...
+            },
+        "name": "Bye-World",
+        "full_name": "{}/Bye-World".format(snd_user_login),
+        # ... other infos skipped ...
+        "language": "Java",
+        "forks_count": 9,
+        "stargazers_count": 80,
+        "watchers_count": 80,
+        # ... other infos skipped ...
+        }]
 
+    def add_response(self, to_query, response, links=None):
+        responses.add(
+            responses.GET, to_query, match_querystring=True,
+            body=json.dumps(response),
+            adding_headers=links,
+            status=200, content_type='application/json')
 
-@with_setup(setup)
-@responses.activate
-def test_search_users_per_country():
-    user, password = 'fake', 'fake'
-    result = main.search_users_per_country(user, password)
-    expected = {"Spain": {"Java": 1, "Python": 1}}
-    assert_equals(result, expected)
+    def setup(self):
+        self.add_response(
+            self.fst_user_query, self.fst_user_response, self.fst_user_links)
+        self.add_response(
+            self.snd_user_query, self.snd_user_response, self.snd_user_links)
+        self.add_response(self.fst_repos_query, self.fst_repos_response)
+        self.add_response(self.snd_repos_query, self.snd_repos_response)
 
+    @responses.activate
+    def test_get_all_users_for_country(self):
+        user_logins = self.instance.get_all_users_for_country(self.cc)
+        assert_equals(user_logins, [self.fst_user_login, self.snd_user_login])
 
-@with_setup(setup)
-@responses.activate
-def test_get_repos_for_user():
-    user, password = 'fake', 'fake'
-    counts = main.get_repos_for_user(user, password, USER_LOGIN)
-    expected = {"Java": 1}
-    assert_equals(dict(counts), expected)
+    @responses.activate
+    def test_get_language_counts_for_user(self):
+        fst_user_langs = self.instance.get_language_counts_for_user(
+            self.fst_user_login)
+        snd_user_langs = self.instance.get_language_counts_for_user(
+            self.snd_user_login)
+        assert_equals(fst_user_langs, {'Java': 2})
+        assert_equals(snd_user_langs, {'Python': 1, 'Java': 1})
 
+    @responses.activate
+    def test_aggregate_lang_counts_for_country(self):
+        language_counts = self.instance.aggregate_lang_counts_for_country(
+            self.cc)
+        expected = {'Java': 3, 'Python': 1}
+        assert_equals(language_counts, expected)
 
-@with_setup(setup)
-@responses.activate
-def test_get_all_users_for_country():
-    user, password = 'fake', 'fake'
-    user_logins = main.get_all_users_for_country(user, password, COUNTRY)
-    assert_equals(user_logins, [USER_LOGIN, ANOTHER_USER_LOGIN])
+    @responses.activate
+    def test_count_languages_for_countries(self):
+        fr_cc = "France"
+        fr_user_login = "olala"
+        fr_user_query = '{0}?q=location:{1}'.format(self.base, fr_cc)
+        fr_user_response = {
+            "total_count": 1,
+            "incomplete_results": False,
+            "items": [{
+                "login": fr_user_login,
+                "id": 100,
+                # ... other infos skipped ...
+                "score": 105.47857}]}
+        fr_repos_query = 'https://api.github.com/users/{}/repos'.format(
+            fr_user_login)
+        fr_repos_response = [{
+            "id": 1296268,
+            "owner": {
+                "login": fr_user_login,
+                "id": 100,
+                # ... other infos skipped ...
+                },
+            "name": "Bonjour-World",
+            "full_name": "{}/Bonjour-World".format(fr_user_login),
+            # ... other infos skipped ...
+            "language": "OCaml",
+            "forks_count": 9,
+            "stargazers_count": 80,
+            "watchers_count": 80,
+            # ... other infos skipped ...
+            }]
+        self.add_response(fr_user_query, fr_user_response)
+        self.add_response(fr_repos_query, fr_repos_response)
+        language_counts_by_cc = self.instance.count_languages_for_countries(
+            [self.cc, fr_cc])
+        expected = {
+            'Spain': {'Java': 3, 'Python': 1},
+            'France': {'OCaml': 1}}
+        assert_equals(language_counts_by_cc, expected)
