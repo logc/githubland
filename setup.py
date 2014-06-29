@@ -1,3 +1,4 @@
+"""This is the setup module for githubland"""
 from setuptools import setup
 
 setup(name='githubland',
