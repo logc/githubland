@@ -3,7 +3,7 @@ import json
 
 import responses
 # pylint: disable=no-name-in-module
-from nose.tools import assert_equals
+from nose.tools import assert_equals, raises
 # pylint: enable=no-name-in-module
 
 import main
@@ -16,7 +16,11 @@ class TestLanguageByCountryCounts(object):
         self.instance = main.LanguageByCountryCounts(USER, PWD, [CC, FR_CC])
 
     def setup(self):
-        """Setup test fixture"""
+        """
+        Setup test fixture: two different countries, with two users in one
+        and one user in the other, who have one common language and two other
+        languages not in common
+        """
         self.add_response(FST_USER_QUERY, FST_USER_RESPONSE, FST_USER_LINKS)
         self.add_response(SND_USER_QUERY, SND_USER_RESPONSE, SND_USER_LINKS)
         self.add_response(FST_REPOS_QUERY, FST_REPOS_RESPONSE)
@@ -33,11 +37,15 @@ class TestLanguageByCountryCounts(object):
             adding_headers=links,
             status=200, content_type='application/json')
 
+    @staticmethod
+    @raises(AssertionError)
+    def test_countries_passed_as_list():
+        """Checks that countries have to be passed as a list"""
+        main.LanguageByCountryCounts(USER, PWD, CC)
+
     @responses.activate
     def test_count_languages(self):
-        """Checks that for two different countries, with two users in one and
-        one user in the other, who have one common language and two other
-        languages not in common, the resulting values are correct"""
+        """Checks aggregation of results for a whole country"""
         self.instance()
         expected = {
             'Spain': {'Java': 3, 'Python': 1},

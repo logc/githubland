@@ -31,13 +31,16 @@ class LanguageByCountryCounts(object):
     """
 
     def __init__(self, auth_user, auth_pass, countries):
+        assert isinstance(countries, list)
         self.auth_user = auth_user
         self.auth_pass = auth_pass
         self.countries = countries
         self.lang_counts_by_cc = defaultdict(lambda: {})
+        self.request_count = 0
 
     def __call__(self):
         for country in self.countries:
+            logging.warn("Starting %s", country)
             self.lang_counts_by_cc[country] = self.__aggregate_by_country(
                 country)
 
@@ -66,6 +69,7 @@ class LanguageByCountryCounts(object):
                 next_url = answer.links['next']['url']
             else:
                 break
+        logging.warn("Found %d users in %s", len(logins), country)
         return logins
 
     def __get_langs_for_user(self, login):
@@ -101,7 +105,7 @@ class LanguageByCountryCounts(object):
             reset = ans.json()['resources'][resource_name]['reset']
             pause = reset - time.time()
             if pause > 0:
-                logging.warning("waiting for %s seconds", pause)
+                logging.warning("waiting for %.2f seconds", pause)
                 time.sleep(pause)
 
     def __get_or_wait(self, query):
@@ -111,20 +115,31 @@ class LanguageByCountryCounts(object):
         """
         answer = requests.get(
             query, auth=HTTPBasicAuth(self.auth_user, self.auth_pass))
+        self.request_count += 1
+        if self.request_count % 10 == 0:
+            logging.warn("Requests so far: %s", self.request_count)
         if not answer.ok:
             self.__wait_for_rate_limit_reset()
+            return self.__get_or_wait(query)
         else:
             return answer
 
 
 def main():
     """Parses the command line and complies with user requests"""
+    logging.basicConfig(
+        format='%(asctime)s %(module)s.%(funcName)s %(levelname)s %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S")
     passwd = getpass.getpass('Please enter your Github password: ')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--user', dest='myuser')
+    parser.add_argument('--user', dest='user')
     args = parser.parse_args()
     args.passwd = passwd
-    args.func(args)
+    counts = LanguageByCountryCounts(args.user, args.passwd, ['Spain'])
+    try:
+        counts()
+    finally:
+        print counts.lang_counts_by_cc
 
 
 def write_out(user_logins, next_url):
