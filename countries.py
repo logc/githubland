@@ -7,9 +7,11 @@ import posixpath
 import re
 from urlparse import urlparse
 
+from filecache import filecache
 from SPARQLWrapper import SPARQLWrapper, JSON
 
 
+@filecache(30 * 24 * 3600)
 def get_european_country_names():
     logging.debug("Querying DBpedia about Europe")
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
