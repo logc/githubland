@@ -2,13 +2,15 @@ import argparse
 import logging
 import time
 
-from maps import draw_map_for_popularity
+import maps
 
 
 def parse_command_line():
     """Parse the command line"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--popularity', type=int, default=0)
+    parser.add_argument('project_number')
+    parser.add_argument('-p', '--popularity', type=int, default=1)
+    parser.add_argument('-e', '--excluded', nargs='+')
     parser.add_argument(
         '-l', '--log-level', metavar='LEVEL',
         action='store', dest='log_level', default=21,
@@ -25,7 +27,10 @@ def main():
         datefmt='%Y-%m-%d %H:%M:%S', level=args.log_level)
     try:
         start = time.time()
-        draw_map_for_popularity(args.popularity)
+        if not args.excluded:
+            maps.draw_map_for_popularity(args.project_number, args.popularity)
+        else:
+            maps.draw_map_excluding(args.project_number, args.excluded)
     finally:
         logging.warning(
             '--- {} seconds ellapsed ---'.format(time.time() - start))
