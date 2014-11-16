@@ -7,6 +7,7 @@ from full_lists import full_lists
 
 
 DATA_DATE = (datetime.datetime(2013, 1, 1), datetime.datetime(2014, 1, 1))
+DATA_DATE2 = (datetime.datetime(2012, 1, 1), datetime.datetime(2012, 12, 31))
 
 european_countries = [
     u'Albania', u'Andorra', u'Armenia', u'Austria', u'Azerbaijan', u'Belarus',
@@ -31,6 +32,10 @@ for country in european_countries:
 countries = iso_codes.values()
 ppps = wbdata.get_dataframe(
     {"NY.GDP.PCAP.PP.KD": "gdpppp"}, country=countries, data_date=DATA_DATE)
+unemployement = wbdata.get_dataframe(
+    {"SL.UEM.TOTL.ZS": "percent"}, country=countries, data_date=DATA_DATE2)
+debt = wbdata.get_dataframe(
+    {"GC.DOD.TOTL.GD.ZS": "debt"}, country=countries, data_date=DATA_DATE2)
 
 
 def get_rankings(language):
@@ -42,20 +47,28 @@ def get_rankings(language):
             rankings[k] = None
     return rankings
 
-ppps['Haskell'] = pd.Series(get_rankings('Haskell'))
-ppps['Clojure'] = pd.Series(get_rankings('Clojure'))
-ppps['Java'] = pd.Series(get_rankings('Java'))
-ppps['C'] = pd.Series(get_rankings('C'))
-ppps['C++'] = pd.Series(get_rankings('C++'))
-ppps['Python'] = pd.Series(get_rankings('Python'))
-ppps['JavaScript'] = pd.Series(get_rankings('JavaScript'))
-ppps['Scheme'] = pd.Series(get_rankings('Scheme'))
-ppps['OCaml'] = pd.Series(get_rankings('OCaml'))
-langs = filter(lambda name: name != 'gdpppp', ppps.columns)
-correlations = []
-for lang in langs:
+languages = ['Haskell', 'Ruby', 'Clojure', 'Java', 'C', 'C++', 'Python',
+             'JavaScript', 'Scheme', 'OCaml']
+for language in languages:
+    series = pd.Series(get_rankings(language))
+    ppps[language] = series
+    unemployement[language] = series
+    debt[language] = series
+
+unemployement = unemployement.dropna()
+gdp_correlations = []
+unemployment_corrs = []
+debt_corrs = []
+for lang in languages:
     # No need to `dropna`, since `Series.corr` drops missing values
-    correlations.append(tuple([lang, ppps.gdpppp.corr(ppps[lang])]))
-correlations.sort(key=lambda x: x[1])
-print ppps
-print correlations
+    gdp_correlations.append(tuple([lang, ppps.gdpppp.corr(ppps[lang])]))
+    unemployment_corrs.append(tuple([
+        lang, unemployement.percent.corr(unemployement[lang])]))
+    debt_corrs.append(tuple([
+        lang, debt.debt.corr(debt[lang])]))
+gdp_correlations.sort(key=lambda x: x[1])
+unemployment_corrs.sort(key=lambda x: x[1], reverse=True)
+debt_corrs.sort(key=lambda x: x[1], reverse=True)
+print gdp_correlations
+print unemployment_corrs
+print debt_corrs
