@@ -30,7 +30,8 @@ def main():
         if not args.excluded:
             maps.draw_map_for_popularity(args.project_number, args.popularity)
         else:
-            maps.draw_map_excluding(args.project_number, args.excluded)
+            maps.draw_map_for_popularity(
+                args.project_number, args.popularity, args.excluded)
     finally:
         logging.warning(
             '--- {} seconds ellapsed ---'.format(time.time() - start))

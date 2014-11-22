@@ -1,3 +1,4 @@
+#pylint: skip-file
 full_lists = {
 "Azerbaijan":  [u'Ruby', u'JavaScript', u'R', u'PHP', u'Python', u'Java', u'CSS', u'Shell', u'Objective-C', u'C++', u'C', u'CoffeeScript', u'Perl', u'C#', u'Emacs Lisp', u'Clojure', u'VimL', u'Awk', u'Go', u'ASP', u'ActionScript', u'Scala', u'Swift', u'Puppet', u'Arduino', u'Assembly', u'Elixir', u'TypeScript', u'PowerShell', u'Vala'] ,
 "Albania":  [u'PHP', u'C', u'JavaScript', u'Shell', u'Java', u'CSS', u'Assembly', u'Objective-C', u'C++', u'Python', u'Visual Basic', u'Pascal', u'Ruby', u'TeX', u'CoffeeScript', u'Oxygene', u'Perl', u'Scala', u'ActionScript', u'C#', u'VimL', u'Swift', u'Go', u'Erlang', u'Vala', u'TypeScript', u'Haskell', u'Apex'] ,
