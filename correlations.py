@@ -168,7 +168,7 @@ def produce_figure(correlations, colorname, measure_name, filename):
     plt.savefig(filename)
 
 
-if __name__ == '__main__':
+def produce_all_figures():
     GDP_CORRS, UNEMPLOYMENT_CORRS, DEBT_CORRS = correlate()
     produce_figure(GDP_CORRS, 'y', 'GDP', 'gdp_corr.png')
     produce_figure(UNEMPLOYMENT_CORRS, 'r', 'U', 'unemp_corr.png')
