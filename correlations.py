@@ -18,7 +18,10 @@ from full_lists import full_lists
 DATA_DATE = (datetime.datetime(2013, 1, 1), datetime.datetime(2014, 1, 1))
 DATA_DATE2 = (datetime.datetime(2012, 1, 1), datetime.datetime(2012, 12, 31))
 
+# This line is required by matplotlib to change the default Tex font
+# pylint: disable=star-args
 rc('font', **{'family': 'serif', 'serif': ['Palatino']})
+# pylint: enable=star-args
 rc('text', usetex=True)
 
 
@@ -124,37 +127,44 @@ def correlate():
 
 
 def produce_figure(correlations, colorname, measure_name, filename):
-    def autolabel(rects, ax):
+    """
+    Produce a bar plot figure out of the passed in correlations
+    """
+    def autolabel(rects, axes):
+        """
+        Label bars with a text right above or below the bar
+        """
         for rect in rects:
             height = rect.get_y()
             vertical = 'top'
             if height == 0:
                 height = rect.get_height()
                 vertical = 'bottom'
-            ax.text(
+            axes.text(
                 rect.get_x()+rect.get_width()/2.,
                 1.05*height,
                 '%.2f' % height,
                 ha='center', va=vertical)
 
-    N = len(correlations)
-    xs = np.arange(N)
+    # pylint: disable=no-member
+    x_values = np.arange(len(correlations))
+    # pylint: enable=no-member
     width = 0.6
 
-    fig, ax = plt.subplots()
-    ys = [x[1] for x in correlations]
-    rects = ax.bar(xs, ys, width, color=colorname, alpha=0.4)
-    ax.set_ylabel(r'$\rho(%s,lang)$' % measure_name)
-    ax.set_xticks(xs+width/2.0)
-    plt.ylim([1.15*min(ys), 1.4*max(ys)])
+    _, axes = plt.subplots()
+    y_values = [x[1] for x in correlations]
+    rects = axes.bar(x_values, y_values, width, color=colorname, alpha=0.4)
+    axes.set_ylabel(r'$\rho(%s,lang)$' % measure_name)
+    axes.set_xticks(x_values+width/2.0)
+    plt.ylim([1.15*min(y_values), 1.4*max(y_values)])
     langs = []
-    for lang, corr in correlations:
+    for lang, _ in correlations:
         if lang != 'JavaScript':
             langs.append(lang)
         else:
             langs.append('JS')
-    ax.set_xticklabels(tuple(langs), rotation=45)
-    autolabel(rects, ax)
+    axes.set_xticklabels(tuple(langs), rotation=45)
+    autolabel(rects, axes)
     plt.savefig(filename)
 
 

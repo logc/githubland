@@ -40,7 +40,7 @@ def unnest(nested_list):
         imap(depth, nested_list)) + 1
     current_depth = depth(nested_list)
     while current_depth > 1:
-        lengths = imap(len, nested_list)
+        lengths = list(imap(len, nested_list))
         if all([length == 1 for length in lengths]):
             nested_list = [item for sublist
                            in nested_list for item in sublist]

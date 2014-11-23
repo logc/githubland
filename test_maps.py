@@ -1,12 +1,21 @@
+"""
+Module test_maps
+
+Tests for the `maps` module
+"""
 from collections import OrderedDict
 
-from mock import patch, call, ANY
+from mock import patch, ANY
+# Pylint does not work well with nose.tools
+# pylint: disable=no-name-in-module
 from nose.tools import assert_equal, ok_
+# pylint: enable=no-name-in-module
 
 import maps
 
 
 def test_choosing_coordinates():
+    """Test that coordinates are well chosen"""
     boundary = {'geometry': {'coordinates': [[[
         (0, 0),
         (0, 0)]],
@@ -26,6 +35,7 @@ def test_choosing_coordinates():
 @patch('maps.draw_map_with_labels')
 @patch('bigquery.get_most_popular_language')
 def test_draw_map_excluding(mock_bigquery, mock_do_draw):
+    """Test how to draw a map excluding some languages from possible results"""
     fake_project_number = 22
     mock_bigquery.side_effect = lambda x, y, z: 'Python'
     maps.draw_map_for_popularity(fake_project_number)

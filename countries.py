@@ -13,6 +13,8 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 
 @filecache(30 * 24 * 3600)
 def get_european_country_names():
+    """Get European country names from a remote service that knows about such
+    entities as countries and Europe."""
     logging.debug("Querying DBpedia about Europe")
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     sparql.setReturnFormat(JSON)
@@ -36,9 +38,9 @@ def get_european_country_names():
         path_parts = posixpath.split(path)
         assert len(path_parts) == 2, "result path malformed"
         name = path_parts[-1]
-        name = re.sub("_", " ", name)
-        name = re.sub("Republic of ", "", name)
-        name = re.sub(" \(country\)", "", name)
+        name = re.sub(r"_", " ", name)
+        name = re.sub(r"Republic of ", "", name)
+        name = re.sub(r" \(country\)", "", name)
         names.append(name)
     logging.warning("Found the following countries: {}".format(sorted(names)))
     return sorted(names)
