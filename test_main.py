@@ -62,10 +62,11 @@ def test_draw_maps_multiple_excludes(mock_maps_handler):
 
 @patch('main.handle_correlate')
 def test_correlate(mock_correlate_handler):
-    sys.argv = shlex.split('program correlate')
+    sys.argv = shlex.split('program correlate 1111')
     main.main()
     assert_true(mock_correlate_handler.called)
     mock_correlate_handler.assert_called_once_with(
         argparse.Namespace(
             func=main.handle_correlate,
-            log_level=21))
+            log_level=21,
+            project_number='1111'))
