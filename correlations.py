@@ -12,7 +12,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-from full_lists import full_lists
+import bigquery
+from countries import get_european_country_names
 
 
 DATA_DATE = (datetime.datetime(2013, 1, 1), datetime.datetime(2014, 1, 1))
@@ -30,21 +31,10 @@ def get_european_countries():
     Returns a list of all european countries as names, excluding some small
     countries.
     """
-    european_countries = [
-        u'Albania', u'Andorra', u'Armenia', u'Austria', u'Azerbaijan',
-        u'Belarus', u'Belgium', u'Bulgaria', u'Croatia', u'Cyprus',
-        u'Czech Republic', u'Denmark', u'Estonia', u'Finland', u'France',
-        u'Georgia', u'Germany', u'Greece', u'Hungary', u'Iceland', u'Ireland',
-        u'Italy', u'Latvia', u'Liechtenstein', u'Lithuania', u'Luxembourg',
-        u'Macedonia', u'Malta', u'Moldova', u'Monaco', u'Montenegro',
-        u'Netherlands', u'Northern Cyprus', u'Norway', u'Poland', u'Portugal',
-        u'Romania', u'Russia', u'San Marino', u'Serbia', u'Slovakia',
-        u'Slovenia', u'Spain', u'Sweden', u'Switzerland', u'Ukraine',
-        u'United Kingdom', u'Vatican City']
     ignored = [
         'Luxembourg', 'Andorra', 'Liechtenstein', 'Macedonia', 'Malta',
         'Monaco', 'San Marino', 'Vatican City', 'Northern Cyprus']
-    return [country for country in european_countries
+    return [country for country in get_european_country_names()
             if country not in ignored]
 
 
@@ -60,13 +50,17 @@ def get_countries_as_iso_codes():
     return iso_codes.values()
 
 
-def get_rankings(language):
+def get_rankings(language, project_number):
     """
     Gets the rankings of a specific language per country.  If it is the most
     preferred language, it gets number 0, if it is the second then 1, etc ...
     """
     rankings = {}
-    for country, languages_sorted_by_preference in full_lists.iteritems():
+    prefs_lists = {}
+    for country in get_european_countries():
+        prefs_lists[country] = bigquery.get_languages_by_popularity(
+            country, project_number)
+    for country, languages_sorted_by_preference in prefs_lists.iteritems():
         try:
             rankings[country] = languages_sorted_by_preference.index(language)
         except ValueError:  # the language does not appear in the list
@@ -94,21 +88,22 @@ LANGUAGES = ['Haskell', 'Ruby', 'Clojure', 'Java', 'C', 'C++', 'Python',
              'JavaScript', 'Scheme', 'OCaml']
 
 
-def add_language_rankings(dataframes):
+def add_language_rankings(dataframes, project_number):
     """ Adds a new column about language preferences to economic dataframes """
     ppps, unemployement, debt = dataframes
     for lang in LANGUAGES:
-        series = pd.Series(get_rankings(lang))
+        series = pd.Series(get_rankings(lang, project_number))
         ppps[lang] = series
         unemployement[lang] = series
         debt[lang] = series
     return ppps, unemployement, debt
 
 
-def correlate():
+def correlate(project_number):
     """ Correlates economic to language preference columns in dataframes """
     dataframes = get_economic_dataframes()
-    ppps, unemployement, debt = add_language_rankings(dataframes)
+    ppps, unemployement, debt = add_language_rankings(
+        dataframes, project_number)
     unemployement = unemployement.dropna()
     gdp_correlations = []
     unemployment_corrs = []
@@ -168,8 +163,8 @@ def produce_figure(correlations, colorname, measure_name, filename):
     plt.savefig(filename)
 
 
-def produce_all_figures():
-    GDP_CORRS, UNEMPLOYMENT_CORRS, DEBT_CORRS = correlate()
+def produce_all_figures(project_number):
+    GDP_CORRS, UNEMPLOYMENT_CORRS, DEBT_CORRS = correlate(project_number)
     produce_figure(GDP_CORRS, 'y', 'GDP', 'gdp_corr.png')
     produce_figure(UNEMPLOYMENT_CORRS, 'r', 'U', 'unemp_corr.png')
     produce_figure(DEBT_CORRS, 'b', 'D', 'debt_corr.png')

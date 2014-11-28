@@ -17,7 +17,7 @@ def handle_maps(args):
 
 
 def handle_correlate(args):
-    correlations.produce_all_figures()
+    correlations.produce_all_figures(args.project_number)
 
 
 def parse_command_line():
@@ -35,6 +35,7 @@ def parse_command_line():
     parser_maps.add_argument('-e', '--excluded', nargs='+')
     parser_maps.set_defaults(func=handle_maps)
     parser_corr = subparsers.add_parser('correlate')
+    parser_corr.add_argument('project_number')
     parser_corr.set_defaults(func=handle_correlate)
     return parser.parse_args()
 
