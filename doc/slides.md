@@ -51,6 +51,16 @@ is a Git repository web-based hosting service
 
 ![Most popular languages excluding JavaScript and PHP](img/languages_excluding_JS_PHP.png)
 
+# Processing Github information
+
+- Github offers a REST API, but it has rate limits
+- [GitHub Archive](http://www.githubarchive.org) publishes all public commits
+  in hourly archives
+- [Google BigQuery](https://cloud.google.com/bigquery/) has the Github timeline
+  as public data
+
+\centering{\includegraphics[width=.5\textwidth, height=.4\textheight]{img/bigquery-logo.png}}
+
 # Which countries are there in Europe?
 
 - There may be new countries:
@@ -65,29 +75,12 @@ DBpedia has a [SPARQL endpoint](http://dbpedia.org/sparql) to **receive
 queries**. There are [wrapper
 libraries](https://pypi.python.org/pypi/SPARQLWrapper) 
 
-# Processing Github information
-
-- Github offers a REST API, but it has rate limits
-- [GitHub Archive](http://www.githubarchive.org) publishes all public commits
-  in hourly archives
-- [Google BigQuery](https://cloud.google.com/bigquery/) has the Github timeline
-  as public data
-
-\centering{\includegraphics[width=.5\textwidth, height=.4\textheight]{img/bigquery-logo.png}}
-
 # No Twitter
 
 \centering{\includegraphics[width=.5\textwidth, height=.4\textheight]{img/no_twitter.jpg}}
 
 - Quite tired of people categorizing tweets.  There are many APIs out there!
-- Do not worry, we are still going to get rich!
-
-# World Bank data
-
-\centering\includegraphics[height=.4\textheight]{img/world-bank-logo.jpg}
-
-- World Bank development and macroeconomic data are available [online](http://data.worldbank.org)
-- `wbdata` is a library to access them from a Python script [^sherouse] 
+- Do not worry, we are still going to get rich! $\rightarrow$ using World Bank macroeconomic data [^sherouse]
 
 [^sherouse]: Sherouse, Oliver (2014). Wbdata. Arlington, VA. Available from http://github.com/OliverSherouse/wbdata.
 
